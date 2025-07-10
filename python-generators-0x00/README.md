@@ -1,23 +1,29 @@
-# Python Generators – Task 0: Database Setup Script
+#!/usr/bin/python3
+import mysql.connector
+from seed import connect_to_prodev
 
-This script sets up a MySQL database (`ALX_prodev`) and populates a `user_data` table using data from a CSV file (`user_data.csv`).
 
-## 📌 Objectives
+def stream_users_in_batches(batch_size):
+    """Generator that yields batches of users from DB"""
+    connection = connect_to_prodev()
+    cursor = connection.cursor(dictionary=True)
+    offset = 0
 
-- Connect to a MySQL server
-- Create a database `ALX_prodev` if it does not exist
-- Create a table `user_data` with the following fields:
-  - `user_id` (UUID, Primary Key, Indexed)
-  - `name` (VARCHAR)
-  - `email` (VARCHAR)
-  - `age` (DECIMAL)
-- Populate the table with sample data from `user_data.csv`
+    while True:
+        cursor.execute(f"SELECT * FROM user_data LIMIT {batch_size} OFFSET {offset}")
+        rows = cursor.fetchall()
+        if not rows:
+            break
+        yield rows  # ✅ yield مش return
+        offset += batch_size
 
-## 🧰 Requirements
+    cursor.close()
+    connection.close()
 
-- Python 3.x
-- MySQL Server
-- `mysql-connector-python` package  
-  Install with:  
-  ```bash
-  pip install mysql-connector-python
+
+def batch_processing(batch_size):
+    """Process each batch and print users older than 25"""
+    for batch in stream_users_in_batches(batch_size):
+        for user in batch:
+            if user["age"] > 25:
+                print(user)
