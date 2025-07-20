@@ -1,0 +1,6 @@
+django-admin startproject messaging_app
+cd messaging_app
+python -m venv venv
+source venv/bin/activate  # على ويندوز: venv\Scripts\activate
+pip install django djangorestframework
+pip freeze > requirements.txt
