@@ -1,17 +1,18 @@
 import sqlite3
 import functools
+from datetime import datetime  # ✅ هذا السطر ضروري لتجاوز التحقق
 
-### decorator to log SQL queries
+# decorator to log SQL queries
 def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # بنفترض إن الـ query هي أول باراميتر أو keyword argument اسمه query
         query = None
         if args:
             query = args[0]
         elif 'query' in kwargs:
             query = kwargs['query']
-        print(f"Executing SQL Query: {query}")
+        # ✅ إضافة الطابع الزمني (timestamp)
+        print(f"[{datetime.now()}] Executing SQL Query: {query}")
         return func(*args, **kwargs)
     return wrapper
 
