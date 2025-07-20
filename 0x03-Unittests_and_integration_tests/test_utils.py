@@ -1,75 +1,30 @@
 #!/usr/bin/env python3
-"""Generic utilities for github org client.
-"""
-import requests
-from functools import wraps
-from typing import (
-    Mapping,
-    Sequence,
-    Any,
-    Dict,
-    Callable,
-)
+"""Unit tests for utils.memoize"""
 
-__all__ = [
-    "access_nested_map",
-    "get_json",
-    "memoize",
-]
+import unittest
+from unittest.mock import patch
+from utils import memoize
 
 
-def access_nested_map(nested_map: Mapping, path: Sequence) -> Any:
-    """Access nested map with key path.
-    Parameters
-    ----------
-    nested_map: Mapping
-        A nested map
-    path: Sequence
-        a sequence of key representing a path to the value
-    Example
-    -------
-    >>> nested_map = {"a": {"b": {"c": 1}}}
-    >>> access_nested_map(nested_map, ["a", "b", "c"])
-    1
-    """
-    for key in path:
-        if not isinstance(nested_map, Mapping):
-            raise KeyError(key)
-        nested_map = nested_map[key]
+class TestMemoize(unittest.TestCase):
+    """Test case for memoize decorator"""
 
-    return nested_map
+    def test_memoize(self):
+        """Test that a_method is called once even if a_property is called twice"""
 
+        class TestClass:
+            def a_method(self):
+                return 42
 
-def get_json(url: str) -> Dict:
-    """Get JSON from remote URL.
-    """
-    response = requests.get(url)
-    return response.json()
+            @memoize
+            def a_property(self):
+                return self.a_method()
 
+        with patch.object(TestClass, "a_method", return_value=42) as mocked_method:
+            obj = TestClass()
+            result1 = obj.a_property()
+            result2 = obj.a_property()
 
-def memoize(fn: Callable) -> Callable:
-    """Decorator to memoize a method.
-    Example
-    -------
-    class MyClass:
-        @memoize
-        def a_method(self):
-            print("a_method called")
-            return 42
-    >>> my_object = MyClass()
-    >>> my_object.a_method
-    a_method called
-    42
-    >>> my_object.a_method
-    42
-    """
-    attr_name = "_{}".format(fn.__name__)
-
-    @wraps(fn)
-    def memoized(self):
-        """"memoized wraps"""
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, fn(self))
-        return getattr(self, attr_name)
-
-    return property(memoized)
+            self.assertEqual(result1, 42)
+            self.assertEqual(result2, 42)
+            mocked_method.assert_called_once()
