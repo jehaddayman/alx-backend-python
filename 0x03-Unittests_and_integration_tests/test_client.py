@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unittests for GithubOrgClient.org"""
+"""Unittests for GithubOrgClient"""
 
 import unittest
 from unittest.mock import patch
@@ -11,17 +11,12 @@ class TestGithubOrgClient(unittest.TestCase):
     """Test class for GithubOrgClient"""
 
     @parameterized.expand([
-        ("google",),
-        ("abc",)
+        ({"license": {"key": "apache-2.0"}}, "apache-2.0", True),
+        ({"license": {"key": "mit"}}, "apache-2.0", False),
+        ({}, "apache-2.0", False),
+        ({"license": None}, "apache-2.0", False),
     ])
-    @patch('client.get_json')
-    def test_org(self, org_name, mock_get_json):
-        """Test that GithubOrgClient.org returns correct data"""
-        expected = {"login": org_name}
-        mock_get_json.return_value = expected
-
-        client = GithubOrgClient(org_name)
-        result = client.org
-
+    def test_has_license(self, repo, license_key, expected):
+        """Test that has_license correctly checks the license"""
+        result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
-        mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
