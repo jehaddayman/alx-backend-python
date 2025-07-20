@@ -1,6 +1,11 @@
 INSTALLED_APPS = [
-    ...
-    'rest_framework',
-    'chats',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'rest_framework',  # ✅ تأكد إنها مضافة
+    'chats',           # ✅ التطبيق الجديد
 ]
-python manage.py startapp chats
