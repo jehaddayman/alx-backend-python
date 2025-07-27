@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-import unittest
-from unittest.mock import Mock
-from utils import memoize  # تأكدي إنك مستوردة memoize من utils.py
-
 class TestMemoize(unittest.TestCase):
+    """Tests for memoize decorator"""
+
     def test_memoize(self):
+        """Test that memoize caches the result after first call"""
         class TestClass:
             def a_method(self):
                 return 42
@@ -13,17 +11,8 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        test_obj = TestClass()
-        test_obj.a_method = Mock(return_value=42)
-
-        # أول نداء: المفروض تستدعي a_method
-        result1 = test_obj.a_property
-        # تاني نداء: المفروض ما تستدعيس a_method، تستخدم القيمة المحفوظة
-        result2 = test_obj.a_property
-
-        # نتاكد إن القيمة صح
-        self.assertEqual(result1, 42)
-        self.assertEqual(result2, 42)
-        # نتأكد إنها استُدعيت مرة واحدة بس
-        test_obj.a_method.assert_called_once()
-python3 -m unittest test_utils.py
+        with patch.object(TestClass, "a_method", return_value=42) as mock_method:
+            obj = TestClass()
+            self.assertEqual(obj.a_property, 42)
+            self.assertEqual(obj.a_property, 42)
+            mock_method.assert_called_once()
